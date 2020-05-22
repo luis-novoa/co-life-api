@@ -74,6 +74,7 @@ RSpec.configure do |config|
     DatabaseCleaner.cleaning do
       example.run
     end
+  end
 end
 
 Shoulda::Matchers.configure do |config|
@@ -81,3 +82,4 @@ Shoulda::Matchers.configure do |config|
     with.test_framework :rspec
     with.library :rails
   end
+end
