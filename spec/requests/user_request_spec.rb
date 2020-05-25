@@ -11,7 +11,7 @@ RSpec.describe 'User request', type: :request do
             name: test_user.name
           }
         }
-        post '/api/v1/users', params: parameters
+        post '/users', params: parameters
         expect(response).to have_http_status(422)
       end
 
@@ -21,7 +21,7 @@ RSpec.describe 'User request', type: :request do
             name: test_user.name
           }
         }
-        post '/api/v1/users', params: parameters
+        post '/users', params: parameters
         expect(response.body).to match(/errors/)
       end
     end
@@ -36,7 +36,7 @@ RSpec.describe 'User request', type: :request do
             password_confirmation: test_user.password
           }
         }
-        post '/api/v1/users', params: parameters
+        post '/users', params: parameters
         expect(response).to have_http_status(201)
       end
 
@@ -49,7 +49,7 @@ RSpec.describe 'User request', type: :request do
             password_confirmation: test_user.password
           }
         }
-        post '/api/v1/users', params: parameters
+        post '/users', params: parameters
         expect(User.count).to eq(1)
       end
     end
