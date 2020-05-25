@@ -98,7 +98,7 @@ RSpec.describe 'User request', type: :request do
       end
 
       it "returns user info" do
-        expect(response.body).to match(/#{subject.name}/)
+        expect(response.body).to match(/#{subject.email}/)
       end
     end
 
@@ -119,6 +119,31 @@ RSpec.describe 'User request', type: :request do
 
       it "returns error message" do
         expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+    end
+
+    context "with other user id by an admin" do
+      let(:other_user) { create(:user, :saved) }
+
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        subject.update(admin: true)
+        get "/users/#{other_user.id}", headers: headers
+      end
+
+      it 'responds with 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns other user's info" do
+        expect(response.body).to match(/#{other_user.email}/)
+      end
+
+      it "hides other user's authentication token" do
+        expect(response.body).to_not match(/#{other_user.authentication_token}/)
       end
     end
   end

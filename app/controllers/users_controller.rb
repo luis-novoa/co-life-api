@@ -4,8 +4,10 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
-    if current_user.id == @user.id
+    if current_user.id == @user.id 
       render json: @user
+    elsif current_user.admin?
+      render json: @user, except: [:authentication_token]
     else
       render json: "This action isn't allowed for your account.", status: :unauthorized
     end
