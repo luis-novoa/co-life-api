@@ -147,4 +147,28 @@ RSpec.describe 'User request', type: :request do
       end
     end
   end
+
+  describe "GET /users" do
+    context "without authentication key" do
+      before(:each) { get "/users" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+
+    context "from common user" do
+      before(:each) { get "/users" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+    end
+  end
 end
