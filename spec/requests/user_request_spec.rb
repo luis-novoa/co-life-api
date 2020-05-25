@@ -33,7 +33,7 @@ RSpec.describe 'User request', type: :request do
             name: test_user.name,
             email: test_user.email,
             password: test_user.password,
-            password_confirmation: test_user.password_confirmation
+            password_confirmation: test_user.password
           }
         }
         post '/api/v1/users', params: parameters
@@ -46,7 +46,7 @@ RSpec.describe 'User request', type: :request do
             name: test_user.name,
             email: test_user.email,
             password: test_user.password,
-            password_confirmation: test_user.password_confirmation
+            password_confirmation: test_user.password
           }
         }
         post '/api/v1/users', params: parameters
