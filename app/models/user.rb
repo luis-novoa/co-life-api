@@ -6,4 +6,5 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
   validates :name, presence: true, uniqueness: { case_sensitive: false }, length: {minimum: 2, maximum: 50}
   validates :password, length: {minimum: 6, maximum: 50}
+  validates :password_confirmation, presence: true
 end

@@ -26,6 +26,22 @@ RSpec.describe 'User request', type: :request do
       end
     end
 
+    context "with unfilled password confirmation" do
+      it "returns errors" do
+        parameters = {
+          user: {
+            name: test_user.name,
+            email: test_user.email,
+            password: test_user.password,
+            password_confirmation: nil
+          }
+        }
+        post '/users', params: parameters
+        expect(response.body).to match(/errors/)
+      end
+    end
+    
+
     context "with correct information" do
       it "responds with 201" do
         parameters = {
