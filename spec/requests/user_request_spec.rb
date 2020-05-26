@@ -203,4 +203,97 @@ RSpec.describe 'User request', type: :request do
       end
     end
   end
+
+  describe "DELETE /users/:id" do
+    subject { create(:user, :saved) } 
+
+    context "without authentication key" do
+      before(:each) { delete "/users/#{subject.id}" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+
+    context "with current user id" do
+      before(:each) do 
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        delete "/users/#{subject.id}", headers: headers
+      end
+      it 'responds with 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it "deletes user account" do
+        expect(User.all).to_not include(subject)
+      end
+    end
+
+    context "with other user id" do
+      let(:other_user) { create(:user, :saved) }
+
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        delete "/users/#{other_user.id}", headers: headers
+      end
+
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+
+      it "doesn't delete other user's account" do
+        expect(User.all).to include(other_user)
+      end
+    end
+
+    context "with other user id by an admin" do
+      let(:other_user) { create(:user, :saved) }
+
+      before(:each) do
+        subject.update(admin: true)
+      end
+
+      it 'responds with 200' do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        delete "/users/#{other_user.id}", headers: headers
+        expect(response).to have_http_status(200)
+      end
+
+      it "deletes other user's account" do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        delete "/users/#{other_user.id}", headers: headers
+        expect(User.all).to_not include(other_user)
+      end
+
+      it "don't delete if other user is also an admin" do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        other_user.update(admin: true)
+        delete "/users/#{other_user.id}", headers: headers
+        expect(User.all).to include(other_user)
+      end
+    end
+  end
 end
+

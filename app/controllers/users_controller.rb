@@ -21,6 +21,20 @@ class UsersController < ApplicationController
       render json: "This action isn't allowed for your account.", status: :unauthorized
     end
   end
+
+  def destroy
+    @user = User.find(params[:id])
+    if current_user.id == @user.id
+      @user.delete
+      render json: "User deleted!", status: :ok
+    elsif current_user.admin && !@user.admin
+      @user.delete
+      render json: "User deleted!", status: :ok
+    else
+      render json: "This action isn't allowed for your account.", status: :unauthorized
+    end
+  end
+  
   
   
   private
