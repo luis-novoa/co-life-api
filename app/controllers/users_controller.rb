@@ -35,10 +35,22 @@ class UsersController < ApplicationController
     end
   end
   
-  
+  def update
+    @user = User.find(params[:id])
+    if current_user.id == @user.id
+      @user.update(user_params)
+      render json: @user, status: :ok
+    else
+      render json: "This action isn't allowed for your account.", status: :unauthorized
+    end
+  end
   
   private
   def require_authentication!
     render json: "This action requires an authentication token.", status: :unauthorized unless current_user.presence
-  end 
+  end
+
+  def user_params
+    params.require(:user).permit(:name, :email)
+  end
 end

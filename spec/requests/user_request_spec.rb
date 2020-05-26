@@ -295,5 +295,72 @@ RSpec.describe 'User request', type: :request do
       end
     end
   end
+
+  describe "PUT /users/:id" do
+    subject { create(:user, :saved) } 
+    let(:new_name) { Faker::Name.name }
+
+    context "without authentication key" do
+      before(:each) { delete "/users/#{subject.id}" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+
+    context "with current user id" do
+      before(:each) do 
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        params = {
+          user: {
+            name: new_name
+          }
+        }
+        put "/users/#{subject.id}", params: params, headers: headers
+      end
+      it 'responds with 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it "changes user information" do
+        expect(User.find(subject.id).name).to eq(new_name)
+      end
+    end
+
+    context "with other user id" do
+      let(:other_user) { create(:user, :saved) }
+
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        params = {
+          user: {
+            name: Faker::Name.name
+          }
+        }
+        put "/users/#{other_user.id}", params: params, headers: headers
+      end
+
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+
+      it "doesn't change other user's information" do
+        expect(User.find(other_user.id).name).to_not eq(new_name)
+      end
+    end
+  end
 end
 
