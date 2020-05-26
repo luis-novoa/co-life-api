@@ -12,6 +12,16 @@ class UsersController < ApplicationController
       render json: "This action isn't allowed for your account.", status: :unauthorized
     end
   end
+
+  def index
+    @users = User.all
+    if current_user.admin?
+      render json: @users, except: [:authentication_token]
+    else
+      render json: "This action isn't allowed for your account.", status: :unauthorized
+    end
+  end
+  
   
   private
   def require_authentication!

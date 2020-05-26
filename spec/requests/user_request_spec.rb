@@ -149,6 +149,7 @@ RSpec.describe 'User request', type: :request do
   end
 
   describe "GET /users" do
+    subject { create(:user, :saved) } 
     context "without authentication key" do
       before(:each) { get "/users" }
       it "responds with 401" do
@@ -161,13 +162,44 @@ RSpec.describe 'User request', type: :request do
     end
 
     context "from common user" do
-      before(:each) { get "/users" }
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        get "/users", headers: headers
+      end
       it "responds with 401" do
         expect(response).to have_http_status(401)
       end
 
       it "returns error message" do
         expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+    end
+
+    context "from admin" do
+      before(:each) do
+        create_list(:user, 4, :saved)
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        subject.update(admin: true)
+        get "/users", headers: headers
+      end
+
+      it "responds with 200" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns list of users" do
+        json_response = JSON.parse(response.body)
+        expect(json_response.size).to eq(5)
+      end
+
+      it "hides other user's authentication token" do
+        expect(response.body).to_not match(/authentication_token/)
       end
     end
   end
