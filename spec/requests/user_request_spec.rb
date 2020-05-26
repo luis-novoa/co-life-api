@@ -68,6 +68,20 @@ RSpec.describe 'User request', type: :request do
         post '/users', params: parameters
         expect(User.count).to eq(1)
       end
+
+      it "doesn't let user.admin be defined" do
+        parameters = {
+          user: {
+            name: test_user.name,
+            email: test_user.email,
+            password: test_user.password,
+            password_confirmation: test_user.password,
+            admin: true
+          }
+        }
+        post '/users', params: parameters
+        expect(User.first.admin).to eq(false)
+      end
     end
   end
 
@@ -319,7 +333,8 @@ RSpec.describe 'User request', type: :request do
         }
         params = {
           user: {
-            name: new_name
+            name: new_name,
+            admin: true
           }
         }
         put "/users/#{subject.id}", params: params, headers: headers
@@ -330,6 +345,10 @@ RSpec.describe 'User request', type: :request do
 
       it "changes user information" do
         expect(User.find(subject.id).name).to eq(new_name)
+      end
+
+      it "don't change user.admin" do
+        expect(User.find(subject.id).admin).to eq(false)  
       end
     end
 
