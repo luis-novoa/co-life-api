@@ -1,5 +1,5 @@
 class API::V1::HomesController < API::V1::APIController
-  skip_before_action :require_authentication!, only: [:show]
+  skip_before_action :require_authentication!, only: [:show, :index]
 
   def create
     @home = current_user.homes.build(home_params)
@@ -18,7 +18,11 @@ class API::V1::HomesController < API::V1::APIController
       render json: "This ad doesn't exist.", status: :not_found
     end
   end
-  
+
+  def index
+    @homes = Home.all
+    render json: @homes, status: :ok
+  end
 
   private
   def home_params

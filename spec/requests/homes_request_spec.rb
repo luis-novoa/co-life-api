@@ -62,8 +62,12 @@ RSpec.describe "Homes", type: :request do
         expect(response).to have_http_status(201)
       end
 
-      it "returns user info" do
+      it "returns user's info" do
         expect(response.body).to match(/#{subject.address}/)
+      end
+
+      it 'adds info to the database' do
+        expect(Home.count).to eq(1)
       end
     end
 
@@ -121,6 +125,23 @@ RSpec.describe "Homes", type: :request do
 
       it "returns warning" do
         expect(response.body).to match(/This ad doesn't exist./)
+      end
+    end
+  end
+
+  describe "GET /api/v1/homes" do
+    context "without authentication key" do
+      before(:each) do
+        create_list(:home, 5)
+        get "/api/v1/homes" 
+      end
+      it "responds with 200" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns list of home ads" do
+        json_response = JSON.parse(response.body)
+        expect(json_response.size).to eq(5)
       end
     end
   end
