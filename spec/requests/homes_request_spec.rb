@@ -145,4 +145,124 @@ RSpec.describe "Homes", type: :request do
       end
     end
   end
+
+  describe "PUT /api/v1/homes/:id" do
+    subject { create(:home) } 
+    let(:other_home) { create(:home) }
+    let(:new_address) { Faker::Address.street_address }
+
+    context "without authentication key" do
+      before(:each) { put "/api/v1/homes/#{subject.id}" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+
+    context "in ad created by current user" do
+      before(:each) do 
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        params = {
+          home: {
+            address: new_address,
+            user_id: 5
+          }
+        }
+        put "/api/v1/homes/#{subject.id}", params: params, headers: headers
+      end
+      it 'responds with 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it 'returns changed info' do
+        expect(response.body).to match(/#{new_address}/)
+      end
+
+      it "changes user information" do
+        expect(Home.find(subject.id).address).to eq(new_address)
+      end
+
+      it "don't change user_id" do
+        expect(Home.find(subject.id).user_id).to eq(subject.user.id)  
+      end
+    end
+
+    context "in other user's ad" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        params = {
+          home: {
+            address: new_address
+          }
+        }
+        put "/api/v1/homes/#{other_home.id}", params: params, headers: headers
+      end
+
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+
+      it "doesn't change other user's information" do
+        expect(Home.find(other_home.id).address).to_not eq(new_address)
+      end
+    end
+
+    context "in other user's ad being admin" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        params = {
+          home: {
+            address: new_address
+          }
+        }
+        subject.user.update_attribute(:admin, true)
+        put "/api/v1/homes/#{other_home.id}", params: params, headers: headers
+      end
+
+      it "responds with 200" do
+        expect(response).to have_http_status(200)
+      end
+
+      it 'returns changed info' do
+        expect(response.body).to match(/#{new_address}/)
+      end
+
+      it "changes other user's ad in the database" do
+        expect(Home.find(other_home.id).address).to eq(new_address)
+      end
+    end
+
+    context "in inexistent ad" do
+      before(:each) do 
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        put "/api/v1/homes/1", headers: headers
+      end
+      it "responds with 404" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns warning" do
+        expect(response.body).to match(/This ad doesn't exist./)
+      end
+    end
+  end
 end

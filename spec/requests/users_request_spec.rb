@@ -334,7 +334,7 @@ RSpec.describe 'User request', type: :request do
     let(:new_name) { Faker::Name.name }
 
     context "without authentication key" do
-      before(:each) { delete "/users/#{subject.id}" }
+      before(:each) { put "/users/#{subject.id}" }
       it "responds with 401" do
         expect(response).to have_http_status(401)
       end

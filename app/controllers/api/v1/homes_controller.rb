@@ -24,6 +24,18 @@ class API::V1::HomesController < API::V1::APIController
     render json: @homes, status: :ok
   end
 
+  def update
+    return render json: "This ad doesn't exist.", status: :not_found unless Home.exists?(id: params[:id])
+    
+    @home = Home.find(params[:id])
+    if @home.user_id == current_user.id || current_user.admin
+      @home.update(home_params)
+      render json: @home, status: :ok
+    else
+      render json: "This action isn't allowed for your account.", status: :unauthorized
+    end
+  end
+
   private
   def home_params
     params.require(:home).permit(:title, :address, :city, :country, :rent, :room_type, :more_info)
