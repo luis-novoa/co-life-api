@@ -1,4 +1,6 @@
 class API::V1::HomesController < API::V1::APIController
+  skip_before_action :require_authentication!, only: [:show]
+
   def create
     @home = current_user.homes.build(home_params)
     if @home.save
@@ -7,6 +9,16 @@ class API::V1::HomesController < API::V1::APIController
       render json: @home.errors, status: :unprocessable_entity
     end
   end
+
+  def show
+    if Home.exists?(id: params[:id])
+      @home = Home.find(params[:id])
+      render json: @home, status: :ok
+    else
+      render json: "This ad doesn't exist.", status: :not_found
+    end
+  end
+  
 
   private
   def home_params

@@ -98,4 +98,31 @@ RSpec.describe "Homes", type: :request do
       end
     end
   end
+
+  describe "GET /api/v1/homes/:id" do
+    subject { create(:home) }
+
+    context "without authentication key" do
+      before(:each) { get "/api/v1/homes/#{subject.id}" }
+      it "responds with 200" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns home ad information" do
+        expect(response.body).to match(/#{subject.address}/)
+      end
+    end
+
+    context "with inexistent id" do
+      before(:each) { get "/api/v1/homes/1" }
+      it "responds with 404" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns warning" do
+        expect(response.body).to match(/This ad doesn't exist./)
+      end
+      
+    end
+  end
 end
