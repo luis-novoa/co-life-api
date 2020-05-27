@@ -122,7 +122,6 @@ RSpec.describe "Homes", type: :request do
       it "returns warning" do
         expect(response.body).to match(/This ad doesn't exist./)
       end
-      
     end
   end
 end

@@ -14,7 +14,7 @@ RSpec.describe Home, type: :model do
   it { is_expected.to validate_length_of(:city).is_at_least(3).is_at_most(50) }
 
   it { is_expected.to validate_presence_of(:country) }
-  it { is_expected.to validate_length_of(:country).is_at_least(3).is_at_most(20) }
+  it { is_expected.to validate_length_of(:country).is_at_least(3).is_at_most(60) }
 
   it { is_expected.to validate_presence_of(:rent) }
   it { is_expected.to validate_numericality_of(:rent) }

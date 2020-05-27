@@ -3,6 +3,8 @@ class UsersController < ApplicationController
   before_action :require_authentication!
 
   def show
+    return render json: "This user doesn't exist.", status: :not_found unless User.exists?(id: params[:id])
+
     @user = User.find(params[:id])
     if current_user.id == @user.id 
       render json: @user
