@@ -1,6 +1,6 @@
 module API::V1
   class APIController < ApplicationController
-    acts_as_token_authentication_handler_for User
+    acts_as_token_authentication_handler_for User, fallback_to_devise: false
     before_action :require_authentication!
 
     private
