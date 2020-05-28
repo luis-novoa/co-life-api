@@ -10,4 +10,5 @@ RSpec.describe Favorite, type: :model do
   it { is_expected.to_not allow_value("#{subject.home_id}_#{subject.user_id}").for(:user_home) }
   it { is_expected.to_not allow_value("#{Faker::Number.number}_#{Faker::Number.number}").for(:user_home) } 
   it { is_expected.to belong_to(:user).required }
+  it { is_expected.to belong_to(:home).required }
 end

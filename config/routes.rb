@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :homes, only: [:create, :show, :index, :update, :destroy]
+      resources :favorites, only: [:create]
     end
   end
 end
