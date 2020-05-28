@@ -21,4 +21,9 @@ FactoryBot.define do
     more_info { Faker::Lorem.paragraph_by_chars(number: 300) }
     user_id { create(:user, :saved).id }
   end
+
+  factory :favorite do
+    user_id { create(:user, :saved).id }
+    home_id { create(:home).id }
+  end
 end
