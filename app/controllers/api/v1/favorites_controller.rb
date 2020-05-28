@@ -5,7 +5,7 @@ class API::V1::FavoritesController < API::V1::APIController
     @favorite = current_user.favorites.build(favorite_params)
     @favorite.user_home = "#{@favorite.user_id}_#{@favorite.home_id}"
     if @favorite.save
-      render json: @favorite, status: :created
+      render json: @favorite, only: [:user_id, :home_id], status: :created
     else
       render json: @favorite.errors, status: :unprocessable_entity
     end
