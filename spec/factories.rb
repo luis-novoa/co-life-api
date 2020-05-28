@@ -25,5 +25,6 @@ FactoryBot.define do
   factory :favorite do
     user_id { create(:user, :saved).id }
     home_id { create(:home).id }
+    user_home { "#{user_id}_#{home_id}" }
   end
 end
