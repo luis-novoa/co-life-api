@@ -83,4 +83,18 @@ RSpec.describe "Favorites", type: :request do
       end
     end
   end
+
+  describe "GET api/v1/favorites" do
+    subject { create(:user, :saved, :favorite_list) } 
+    context "without authentication key" do
+      before(:each) { post "/api/v1/favorites" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+  end
 end

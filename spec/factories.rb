@@ -9,6 +9,12 @@ FactoryBot.define do
     trait :saved do
       password_confirmation { password }
     end
+
+    trait :favorite_list do
+      after :create do |user|
+        create_list(:favorite, 5, user_id: user.id)
+      end
+    end
   end
 
   factory :home do
