@@ -1,10 +1,9 @@
 class UsersController < ApplicationController
   acts_as_token_authentication_handler_for User, fallback_to_devise: false
   before_action :require_authentication!
+  before_action :check_if_user_exists, except: [:index]
 
   def show
-    return render json: "This user doesn't exist.", status: :not_found unless User.exists?(id: params[:id])
-
     @user = User.find(params[:id])
     if current_user.id == @user.id 
       render json: @user
@@ -54,5 +53,9 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:name, :email)
+  end
+
+  def check_if_user_exists
+    return render json: "This user doesn't exist.", status: :not_found unless User.exists?(id: params[:id])
   end
 end

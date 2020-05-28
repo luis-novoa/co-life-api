@@ -327,6 +327,24 @@ RSpec.describe 'User request', type: :request do
         expect(User.all).to include(other_user)
       end
     end
+
+    context "with inexistent user id" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        delete "/users/1", headers: headers
+      end
+
+      it "responds with 404 if user doesn't exist" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns warning" do
+        expect(response.body).to match(/This user doesn't exist./)
+      end
+    end
   end
 
   describe "PUT /users/:id" do
@@ -397,6 +415,24 @@ RSpec.describe 'User request', type: :request do
 
       it "doesn't change other user's information" do
         expect(User.find(other_user.id).name).to_not eq(new_name)
+      end
+    end
+
+    context "with inexistent user id" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        put "/users/1", headers: headers
+      end
+
+      it "responds with 404 if user doesn't exist" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns warning" do
+        expect(response.body).to match(/This user doesn't exist./)
       end
     end
   end
