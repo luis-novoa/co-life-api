@@ -184,7 +184,7 @@ RSpec.describe "Homes", type: :request do
         expect(response.body).to match(/#{new_address}/)
       end
 
-      it "changes user information" do
+      it "changes ad information" do
         expect(Home.find(subject.id).address).to eq(new_address)
       end
 
@@ -255,6 +255,106 @@ RSpec.describe "Homes", type: :request do
           'X-User-Token' => subject.user.authentication_token
         }
         put "/api/v1/homes/1", headers: headers
+      end
+      it "responds with 404" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns warning" do
+        expect(response.body).to match(/This ad doesn't exist./)
+      end
+    end
+  end
+
+  describe "DELETE /api/v1/homes/:id" do
+    subject { create(:home) } 
+    let(:other_home) { create(:home) }
+
+    context "without authentication key" do
+      before(:each) { delete "/api/v1/homes/#{subject.id}" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+
+    context "in ad created by current user" do
+      before(:each) do 
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        delete "/api/v1/homes/#{subject.id}", headers: headers
+      end
+
+      it 'responds with 200' do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns success message" do
+        expect(response.body).to match(/Ad deleted!/)
+      end
+
+      it "deletes ad" do
+        expect(Home.all).to_not include(subject)
+      end
+    end
+
+    context "in other user's ad" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        delete "/api/v1/homes/#{other_home.id}", headers: headers
+      end
+
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action isn't allowed for your account./)
+      end
+
+      it "doesn't delete other user's ad" do
+        expect(Home.all).to include(other_home)
+      end
+    end
+
+    context "in other user's ad being admin" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        subject.user.update_attribute(:admin, true)
+        delete "/api/v1/homes/#{other_home.id}", headers: headers
+      end
+
+      it "responds with 200" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns success message" do
+        expect(response.body).to match(/Ad deleted!/)
+      end
+
+      it "deletes other user's ad" do
+        expect(Home.all).to_not include(other_home)
+      end
+    end
+
+    context "in inexistent ad" do
+      before(:each) do 
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        delete "/api/v1/homes/1", headers: headers
       end
       it "responds with 404" do
         expect(response).to have_http_status(404)
