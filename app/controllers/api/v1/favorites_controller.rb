@@ -11,6 +11,11 @@ class API::V1::FavoritesController < API::V1::APIController
     end
   end
 
+  def index
+    current_user.admin ? @favorites = Favorite.all : @favorites ||= current_user.favorites
+    render json: @favorites, only: [:user_id, :home_id], status: :ok
+  end
+
   private
   def favorite_params
     params.require(:favorite).permit(:home_id)
