@@ -142,4 +142,82 @@ RSpec.describe "Favorites", type: :request do
       end
     end
   end
+
+  describe "DELETE api/v1/favorites/:user_home" do
+    subject { create(:favorite) }
+
+    context "without authentication key" do
+      before(:each) { delete "/api/v1/favorites/#{subject.user_home}" }
+      it "responds with 401" do
+        expect(response).to have_http_status(401)
+      end
+
+      it "returns error message" do
+        expect(response.body).to match(/This action requires an authentication token./)
+      end
+    end
+
+    context "with current user's favorite" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        delete "/api/v1/favorites/#{subject.user_home}", headers: headers
+      end
+
+      it "responds with 200" do
+        expect(response).to have_http_status(200)
+      end
+
+      it "returns success message" do
+        expect(response.body).to match(/Ad removed from your favorites list!/)
+      end
+
+      it "deletes home ad from favorites" do
+        expect(subject.user.favorites).to_not include(subject)
+      end
+    end
+
+    context "with other user's favorite" do
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.home.user.email,
+          'X-User-Token' => subject.home.user.authentication_token
+        }
+        delete "/api/v1/favorites/#{subject.user_home}", headers: headers
+      end
+
+      it "responds with 404" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns failure message" do
+        expect(response.body).to match(/Favorite relation doesn't belong to this user./)
+      end
+
+      it "doesn't delete home ad from other user's favorites" do
+        expect(subject.user.favorites).to include(subject)
+      end
+    end
+
+    context "with inexistent favorite" do
+      let(:user) { subject.user }
+      before(:each) do
+        headers = {
+          'X-User-Email' => subject.user.email,
+          'X-User-Token' => subject.user.authentication_token
+        }
+        delete "/api/v1/favorites/#{subject.user_id}_#{subject.home_id - 1}", headers: headers
+      end
+
+      it "responds with 404" do
+        expect(response).to have_http_status(404)
+      end
+
+      it "returns failure message" do
+        expect(response.body).to match(/Favorite relation doesn't belong to this user./)
+      end
+    end
+  end
 end
