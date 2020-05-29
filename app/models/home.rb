@@ -7,5 +7,6 @@ class Home < ApplicationRecord
   validates :room_type, presence: true, inclusion: { in: %w(individual shared) }
   validates :more_info, length: {minimum: 0, maximum: 500}, allow_nil: true
   validates :user_id, presence: true
+  has_many :favorites, dependent: :destroy
   belongs_to :user
 end

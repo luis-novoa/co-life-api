@@ -18,8 +18,8 @@ RSpec.describe User, type: :model do
 
   it { is_expected.to validate_presence_of(:password_confirmation) }
 
-  it { is_expected.to have_many(:homes)}
-  it { is_expected.to have_many(:favorites) } 
+  it { is_expected.to have_many(:homes).dependent(:destroy) }
+  it { is_expected.to have_many(:favorites).dependent(:destroy) } 
 
   it ".admin default to false" do
     subject.save

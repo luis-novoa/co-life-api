@@ -8,6 +8,6 @@ class User < ApplicationRecord
   validates :password, presence: true, length: { minimum: 6, maximum: 50 }, on: [:create]
   validates :password_confirmation, presence: true, on: [:create]
 
-  has_many :homes
-  has_many :favorites
+  has_many :homes, dependent: :destroy
+  has_many :favorites, dependent: :destroy
 end
