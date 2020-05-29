@@ -292,14 +292,14 @@ RSpec.describe 'User request', type: :request do
       end
     end
 
-    context "with other user id by an admin" do
+    context "with admin account" do
       let(:other_user) { create(:user, :saved) }
 
       before(:each) do
         subject.update(admin: true)
       end
 
-      it 'responds with 200' do
+      it 'responds with 200 when deleting other user account' do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
@@ -317,7 +317,7 @@ RSpec.describe 'User request', type: :request do
         expect(User.all).to_not include(other_user)
       end
 
-      it "don't delete if other user is also an admin" do
+      it "doesn't delete if other user is also an admin" do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
@@ -325,6 +325,15 @@ RSpec.describe 'User request', type: :request do
         other_user.update(admin: true)
         delete "/users/#{other_user.id}", headers: headers
         expect(User.all).to include(other_user)
+      end
+
+      it "doesn't delete own account" do
+        headers = {
+          'X-User-Email' => subject.email,
+          'X-User-Token' => subject.authentication_token
+        }
+        delete "/users/#{subject.id}", headers: headers
+        expect(User.all).to include(subject)
       end
     end
 

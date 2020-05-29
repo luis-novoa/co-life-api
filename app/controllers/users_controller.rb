@@ -25,7 +25,7 @@ class UsersController < ApplicationController
 
   def destroy
     @user = User.find(params[:id])
-    if current_user.id == @user.id
+    if current_user.id == @user.id && !current_user.admin
       @user.delete
       render json: "User deleted!", status: :ok
     elsif current_user.admin && !@user.admin
