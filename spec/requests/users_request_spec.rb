@@ -2,10 +2,17 @@ require 'rails_helper'
 require 'spec_helper'
 
 RSpec.describe 'User request', type: :request do
-  describe "POST /users" do
+  def define_headers
+    {
+      'X-User-Email' => subject.email,
+      'X-User-Token' => subject.authentication_token
+    }
+  end
+
+  describe 'POST /users' do
     let(:test_user) { build(:user) }
-    context "with missing information" do
-      it "responds with 422" do
+    context 'with missing information' do
+      it 'responds with 422' do
         parameters = {
           user: {
             name: test_user.name
@@ -15,7 +22,7 @@ RSpec.describe 'User request', type: :request do
         expect(response).to have_http_status(422)
       end
 
-      it "returns errors" do
+      it 'returns errors' do
         parameters = {
           user: {
             name: test_user.name
@@ -26,8 +33,8 @@ RSpec.describe 'User request', type: :request do
       end
     end
 
-    context "with unfilled password confirmation" do
-      it "returns errors" do
+    context 'with unfilled password confirmation' do
+      it 'returns errors' do
         parameters = {
           user: {
             name: test_user.name,
@@ -40,67 +47,55 @@ RSpec.describe 'User request', type: :request do
         expect(response.body).to match(/errors/)
       end
     end
-    
 
-    context "with correct information" do
-      it "responds with 201" do
-        parameters = {
-          user: {
-            name: test_user.name,
-            email: test_user.email,
-            password: test_user.password,
-            password_confirmation: test_user.password
-          }
+    def correct_info
+      {
+        user: {
+          name: test_user.name,
+          email: test_user.email,
+          password: test_user.password,
+          password_confirmation: test_user.password
         }
+      }
+    end
+
+    context 'with correct information' do
+      it 'responds with 201' do
+        parameters = correct_info
         post '/users', params: parameters
         expect(response).to have_http_status(201)
       end
 
-      it "creates new user" do
-        parameters = {
-          user: {
-            name: test_user.name,
-            email: test_user.email,
-            password: test_user.password,
-            password_confirmation: test_user.password
-          }
-        }
+      it 'creates new user' do
+        parameters = correct_info
         post '/users', params: parameters
         expect(User.count).to eq(1)
       end
 
       it "doesn't let user.admin be defined" do
-        parameters = {
-          user: {
-            name: test_user.name,
-            email: test_user.email,
-            password: test_user.password,
-            password_confirmation: test_user.password,
-            admin: true
-          }
-        }
+        parameters = correct_info
         post '/users', params: parameters
         expect(User.first.admin).to eq(false)
       end
     end
   end
 
-  describe "GET /users/:id" do
-    subject { create(:user, :saved) } 
+  describe 'GET /users/:id' do
+    subject { create(:user, :saved) }
 
-    context "without authentication key" do
+    context 'without authentication key' do
       before(:each) { get "/users/#{subject.id}" }
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action requires an authentication token./)
       end
     end
 
-    context "with current user id" do
-      before(:each) do 
+    context 'with current user id' do
+      before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
@@ -111,12 +106,12 @@ RSpec.describe 'User request', type: :request do
         expect(response).to have_http_status(200)
       end
 
-      it "returns user info" do
+      it 'returns user info' do
         expect(response.body).to match(/#{subject.email}/)
       end
     end
 
-    context "with other user id" do
+    context 'with other user id' do
       let(:other_user) { create(:user, :saved) }
 
       before(:each) do
@@ -127,16 +122,16 @@ RSpec.describe 'User request', type: :request do
         get "/users/#{other_user.id}", headers: headers
       end
 
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action isn't allowed for your account./)
       end
     end
 
-    context "with other user id by an admin" do
+    context 'with other user id by an admin' do
       let(:other_user) { create(:user, :saved) }
 
       before(:each) do
@@ -161,57 +156,57 @@ RSpec.describe 'User request', type: :request do
       end
     end
 
-    context "with inexistent user id by an admin" do
+    context 'with inexistent user id by an admin' do
       before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
         }
         subject.update(admin: true)
-        get "/users/1", headers: headers
+        get '/users/1', headers: headers
       end
 
       it "responds with 404 if user doesn't exist" do
         expect(response).to have_http_status(404)
       end
 
-      it "returns warning" do
+      it 'returns warning' do
         expect(response.body).to match(/This user doesn't exist./)
       end
     end
   end
 
-  describe "GET /users" do
-    subject { create(:user, :saved) } 
-    context "without authentication key" do
-      before(:each) { get "/users" }
-      it "responds with 401" do
+  describe 'GET /users' do
+    subject { create(:user, :saved) }
+    context 'without authentication key' do
+      before(:each) { get '/users' }
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action requires an authentication token./)
       end
     end
 
-    context "from common user" do
+    context 'from common user' do
       before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
         }
-        get "/users", headers: headers
+        get '/users', headers: headers
       end
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action isn't allowed for your account./)
       end
     end
 
-    context "from admin" do
+    context 'from admin' do
       before(:each) do
         create_list(:user, 4, :saved)
         headers = {
@@ -219,14 +214,14 @@ RSpec.describe 'User request', type: :request do
           'X-User-Token' => subject.authentication_token
         }
         subject.update(admin: true)
-        get "/users", headers: headers
+        get '/users', headers: headers
       end
 
-      it "responds with 200" do
+      it 'responds with 200' do
         expect(response).to have_http_status(200)
       end
 
-      it "returns list of users" do
+      it 'returns list of users' do
         json_response = JSON.parse(response.body)
         expect(json_response.size).to eq(5)
       end
@@ -237,22 +232,22 @@ RSpec.describe 'User request', type: :request do
     end
   end
 
-  describe "DELETE /users/:id" do
-    subject { create(:user, :saved) } 
+  describe 'DELETE /users/:id' do
+    subject { create(:user, :saved) }
 
-    context "without authentication key" do
+    context 'without authentication key' do
       before(:each) { delete "/users/#{subject.id}" }
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action requires an authentication token./)
       end
     end
 
-    context "with current user id" do
-      before(:each) do 
+    context 'with current user id' do
+      before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
@@ -263,12 +258,12 @@ RSpec.describe 'User request', type: :request do
         expect(response).to have_http_status(200)
       end
 
-      it "deletes user account" do
+      it 'deletes user account' do
         expect(User.all).to_not include(subject)
       end
     end
 
-    context "with other user id" do
+    context 'with other user id' do
       let(:other_user) { create(:user, :saved) }
 
       before(:each) do
@@ -279,11 +274,11 @@ RSpec.describe 'User request', type: :request do
         delete "/users/#{other_user.id}", headers: headers
       end
 
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action isn't allowed for your account./)
       end
 
@@ -292,7 +287,7 @@ RSpec.describe 'User request', type: :request do
       end
     end
 
-    context "with admin account" do
+    context 'with admin account' do
       let(:other_user) { create(:user, :saved) }
 
       before(:each) do
@@ -300,79 +295,67 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'responds with 200 when deleting other user account' do
-        headers = {
-          'X-User-Email' => subject.email,
-          'X-User-Token' => subject.authentication_token
-        }
+        headers = define_headers
         delete "/users/#{other_user.id}", headers: headers
         expect(response).to have_http_status(200)
       end
 
       it "deletes other user's account" do
-        headers = {
-          'X-User-Email' => subject.email,
-          'X-User-Token' => subject.authentication_token
-        }
+        headers = define_headers
         delete "/users/#{other_user.id}", headers: headers
         expect(User.all).to_not include(other_user)
       end
 
       it "doesn't delete if other user is also an admin" do
-        headers = {
-          'X-User-Email' => subject.email,
-          'X-User-Token' => subject.authentication_token
-        }
+        headers = define_headers
         other_user.update(admin: true)
         delete "/users/#{other_user.id}", headers: headers
         expect(User.all).to include(other_user)
       end
 
       it "doesn't delete own account" do
-        headers = {
-          'X-User-Email' => subject.email,
-          'X-User-Token' => subject.authentication_token
-        }
+        headers = define_headers
         delete "/users/#{subject.id}", headers: headers
         expect(User.all).to include(subject)
       end
     end
 
-    context "with inexistent user id" do
+    context 'with inexistent user id' do
       before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
         }
-        delete "/users/1", headers: headers
+        delete '/users/1', headers: headers
       end
 
       it "responds with 404 if user doesn't exist" do
         expect(response).to have_http_status(404)
       end
 
-      it "returns warning" do
+      it 'returns warning' do
         expect(response.body).to match(/This user doesn't exist./)
       end
     end
   end
 
-  describe "PUT /users/:id" do
-    subject { create(:user, :saved) } 
+  describe 'PUT /users/:id' do
+    subject { create(:user, :saved) }
     let(:new_name) { Faker::Name.name }
 
-    context "without authentication key" do
+    context 'without authentication key' do
       before(:each) { put "/users/#{subject.id}" }
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action requires an authentication token./)
       end
     end
 
-    context "with current user id" do
-      before(:each) do 
+    context 'with current user id' do
+      before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
@@ -389,16 +372,16 @@ RSpec.describe 'User request', type: :request do
         expect(response).to have_http_status(200)
       end
 
-      it "changes user information" do
+      it 'changes user information' do
         expect(User.find(subject.id).name).to eq(new_name)
       end
 
       it "don't change user.admin" do
-        expect(User.find(subject.id).admin).to eq(false)  
+        expect(User.find(subject.id).admin).to eq(false)
       end
     end
 
-    context "with other user id" do
+    context 'with other user id' do
       let(:other_user) { create(:user, :saved) }
 
       before(:each) do
@@ -414,11 +397,11 @@ RSpec.describe 'User request', type: :request do
         put "/users/#{other_user.id}", params: params, headers: headers
       end
 
-      it "responds with 401" do
+      it 'responds with 401' do
         expect(response).to have_http_status(401)
       end
 
-      it "returns error message" do
+      it 'returns error message' do
         expect(response.body).to match(/This action isn't allowed for your account./)
       end
 
@@ -427,23 +410,22 @@ RSpec.describe 'User request', type: :request do
       end
     end
 
-    context "with inexistent user id" do
+    context 'with inexistent user id' do
       before(:each) do
         headers = {
           'X-User-Email' => subject.email,
           'X-User-Token' => subject.authentication_token
         }
-        put "/users/1", headers: headers
+        put '/users/1', headers: headers
       end
 
       it "responds with 404 if user doesn't exist" do
         expect(response).to have_http_status(404)
       end
 
-      it "returns warning" do
+      it 'returns warning' do
         expect(response.body).to match(/This user doesn't exist./)
       end
     end
   end
 end
-

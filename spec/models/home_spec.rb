@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'spec_helper'
 
 RSpec.describe Home, type: :model do
-  subject { build(:home) } 
+  subject { build(:home) }
   it { is_expected.to validate_presence_of(:title) }
   it { is_expected.to validate_length_of(:title).is_at_least(3).is_at_most(100) }
 
@@ -20,11 +20,11 @@ RSpec.describe Home, type: :model do
   it { is_expected.to validate_numericality_of(:rent) }
 
   it { is_expected.to validate_presence_of(:room_type) }
-  it { is_expected.to validate_inclusion_of(:room_type).in_array(%w(individual shared)) }
+  it { is_expected.to validate_inclusion_of(:room_type).in_array(%w[individual shared]) }
 
   it { is_expected.to validate_length_of(:more_info).is_at_least(0).is_at_most(500) }
 
   it { is_expected.to validate_presence_of(:user_id) }
-  it { is_expected.to have_many(:favorites).dependent(:destroy) } 
-  it { is_expected.to belong_to(:user).required } 
+  it { is_expected.to have_many(:favorites).dependent(:destroy) }
+  it { is_expected.to belong_to(:user).required }
 end

@@ -8,9 +8,8 @@ class Favorite < ApplicationRecord
   belongs_to :home
 
   private
+
   def ensure_user_home_format
-    unless user_home == "#{user_id}_#{home_id}"
-      self.errors.add(:user_home, "Invalid ids or wrong id order.")
-    end
+    errors.add(:user_home, 'Invalid ids or wrong id order.') unless user_home == "#{user_id}_#{home_id}"
   end
 end

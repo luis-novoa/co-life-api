@@ -1,6 +1,6 @@
 class API::V1::HomesController < API::V1::APIController
-  skip_before_action :require_authentication!, only: [:show, :index]
-  before_action :check_if_ad_exists, except: [:create, :index]
+  skip_before_action :require_authentication!, only: %i[show index]
+  before_action :check_if_ad_exists, except: %i[create index]
 
   def create
     @home = current_user.homes.build(home_params)
@@ -42,6 +42,7 @@ class API::V1::HomesController < API::V1::APIController
   end
 
   private
+
   def home_params
     params.require(:home).permit(:title, :address, :city, :country, :rent, :room_type, :more_info)
   end

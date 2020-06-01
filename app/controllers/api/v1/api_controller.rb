@@ -4,8 +4,9 @@ module API::V1
     before_action :require_authentication!
 
     private
+
     def require_authentication!
-      render json: "This action requires an authentication token.", status: :unauthorized unless current_user.presence
-    end 
-  end  
+      render json: 'This action requires an authentication token.', status: :unauthorized unless current_user.presence
+    end
+  end
 end
