@@ -1,9 +1,7 @@
 class API::V1::FavoritesController < API::V1::APIController
-  # before_action :check_if_ad_exists, only: [:create]
+  before_action -> { check_if_ad_exists(favorite_params[:home_id]) }, only: [:create] 
 
   def create
-    return render json: "This ad doesn't exist.", status: :not_found unless Home.exists?(id: favorite_params[:home_id])
-
     @favorite = current_user.favorites.build(favorite_params)
     @favorite.user_home = "#{@favorite.user_id}_#{@favorite.home_id}"
     if @favorite.save
