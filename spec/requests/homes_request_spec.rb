@@ -212,7 +212,7 @@ RSpec.describe 'Homes', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action isn't allowed for your account./)
+        expect(response.body).to match(/This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID./)
       end
 
       it "doesn't change other user's information" do
@@ -317,7 +317,7 @@ RSpec.describe 'Homes', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action isn't allowed for your account./)
+        expect(response.body).to match(/This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID./)
       end
 
       it "doesn't delete other user's ad" do

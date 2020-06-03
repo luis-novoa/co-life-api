@@ -40,6 +40,6 @@ class API::V1::HomesController < API::V1::APIController
 
   def check_privilege
     @home = Home.find(params[:id])
-    render json: "This action isn't allowed for your account.", status: :unauthorized unless (@home.user_id == current_user.id || current_user.admin)
+    render json: "This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID.", status: :unauthorized unless (@home.user_id == current_user.id || current_user.admin)
   end
 end
