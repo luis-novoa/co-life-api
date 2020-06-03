@@ -2,16 +2,12 @@ class UsersController < ApplicationController
   acts_as_token_authentication_handler_for User, fallback_to_devise: false
   before_action :require_authentication!
   before_action :check_if_user_exists, except: [:index]
+  before_action :set_user, except: [:index]
+  before_action :check_profile_ownership, except: %i[index update]
 
   def show
-    @user = User.find(params[:id])
-    if current_user.id == @user.id
-      render json: @user
-    elsif current_user.admin?
-      render json: @user, except: [:authentication_token]
-    else
-      render json: "This action isn't allowed for your account.", status: :unauthorized
-    end
+    return render json: @user, except: [:authentication_token], status: :ok if current_user.admin? && current_user.id != @user.id
+    render json: @user, status: :ok
   end
 
   def index
@@ -19,44 +15,44 @@ class UsersController < ApplicationController
     if current_user.admin?
       render json: @users, except: [:authentication_token]
     else
-      render json: "This action isn't allowed for your account.", status: :unauthorized
+      render json: "Log in as an administrator to perform this action.", status: :unauthorized
     end
   end
 
   def destroy
-    @user = User.find(params[:id])
-    if current_user.id == @user.id && !current_user.admin
-      @user.delete
-      render json: 'User deleted!', status: :ok
-    elsif current_user.admin && !@user.admin
+    if !current_user.admin || (current_user.admin && !@user.admin)
       @user.delete
       render json: 'User deleted!', status: :ok
     else
       render json: "This action isn't allowed for your account.", status: :unauthorized
     end
+
   end
 
   def update
-    @user = User.find(params[:id])
     if current_user.id == @user.id
       @user.update(user_params)
       render json: @user, status: :ok
     else
-      render json: "This action isn't allowed for your account.", status: :unauthorized
+      render json: "This action can only be performed on your own ID.", status: :unauthorized
     end
   end
 
   private
 
-  def require_authentication!
-    render json: 'This action requires an authentication token.', status: :unauthorized unless current_user.presence
-  end
-
   def user_params
     params.require(:user).permit(:name, :email)
   end
 
+  def set_user
+    @user = User.find(params[:id])
+  end
+
   def check_if_user_exists
     return render json: "This user doesn't exist.", status: :not_found unless User.exists?(id: params[:id])
+  end
+
+  def check_profile_ownership
+    render json: "This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID.", status: :unauthorized unless current_user.id == @user.id || current_user.admin
   end
 end

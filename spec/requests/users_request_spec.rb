@@ -127,7 +127,7 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action isn't allowed for your account./)
+        expect(response.body).to match(/This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID./)
       end
     end
 
@@ -202,7 +202,7 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action isn't allowed for your account./)
+        expect(response.body).to match(/Log in as an administrator to perform this action./)
       end
     end
 
@@ -279,7 +279,7 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action isn't allowed for your account./)
+        expect(response.body).to match(/This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID./)
       end
 
       it "doesn't delete other user's account" do
@@ -402,7 +402,7 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action isn't allowed for your account./)
+        expect(response.body).to match(/This action can only be performed on your own ID./)
       end
 
       it "doesn't change other user's information" do

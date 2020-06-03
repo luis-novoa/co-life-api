@@ -17,13 +17,13 @@ class API::V1::FavoritesController < API::V1::APIController
   end
 
   def destroy
-    unless current_user.favorites.exists?(user_home: params[:user_home])
+    if current_user.favorites.exists?(user_home: params[:user_home])
+      @favorite = current_user.favorites.find_by(user_home: params[:user_home])
+      @favorite.delete
+      render json: 'Ad removed from your favorites list!', status: :ok
+    else
       return render json: "Favorite relation doesn't belong to this user.", status: :not_found
     end
-
-    @favorite = current_user.favorites.find_by(user_home: params[:user_home])
-    @favorite.delete
-    render json: 'Ad removed from your favorites list!', status: :ok
   end
 
   private
