@@ -1,30 +1,28 @@
 class UsersController < ApplicationController
   acts_as_token_authentication_handler_for User, fallback_to_devise: false
   before_action :require_authentication!
-  before_action :check_if_user_exists, except: [:index]
-  before_action :set_user, except: [:index]
+  before_action :check_if_user_exists, except: %i[index]
+  before_action :set_user, except: %i[index]
   before_action :check_profile_ownership, except: %i[index update]
 
   def show
-    return render json: @user, except: [:authentication_token], status: :ok if current_user.admin? && current_user.id != @user.id
+    return render json: @user, except: %i[authentication_token], status: :ok if current_user.admin? && current_user.id != @user.id
     render json: @user, status: :ok
   end
 
   def index
     @users = User.all
     if current_user.admin?
-      render json: @users, except: [:authentication_token]
+      render json: @users, except: %i[authentication_token]
     else
       render json: "Log in as an administrator to perform this action.", status: :unauthorized
     end
   end
 
   def destroy
-    if !current_user.admin || (current_user.admin && !@user.admin)
+    unless @user.admin
       @user.delete
       render json: 'User deleted!', status: :ok
-    else
-      render json: "This action isn't allowed for your account.", status: :unauthorized
     end
 
   end
