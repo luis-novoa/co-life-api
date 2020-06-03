@@ -1,5 +1,5 @@
 class API::V1::FavoritesController < API::V1::APIController
-  before_action -> { check_if_ad_exists(favorite_params[:home_id]) }, only: [:create] 
+  before_action -> { check_if_ad_exists(favorite_params[:home_id]) }, only: [:create]
 
   def create
     @favorite = current_user.favorites.build(favorite_params)
@@ -22,7 +22,7 @@ class API::V1::FavoritesController < API::V1::APIController
       @favorite.delete
       render json: 'Ad removed from your favorites list!', status: :ok
     else
-      return render json: "Favorite relation doesn't belong to this user.", status: :not_found
+      render json: "Favorite relation doesn't belong to this user.", status: :not_found
     end
   end
 

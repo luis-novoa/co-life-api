@@ -1,6 +1,6 @@
 class API::V1::HomesController < API::V1::APIController
   skip_before_action :require_authentication!, only: %i[show index]
-  before_action -> { check_if_ad_exists(params[:id]) },  except: %i[create index] 
+  before_action -> { check_if_ad_exists(params[:id]) }, except: %i[create index]
   before_action :check_privilege, only: %i[destroy update]
 
   def create
@@ -40,6 +40,11 @@ class API::V1::HomesController < API::V1::APIController
 
   def check_privilege
     @home = Home.find(params[:id])
-    render json: "This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID.", status: :unauthorized unless (@home.user_id == current_user.id || current_user.admin)
+    return if @home.user_id == current_user.id || current_user.admin
+
+    render json:
+    'This action can only be performed on your own ID. '\
+    "Log in as an administrator to perform this action another user's ID.",
+           status: :unauthorized
   end
 end

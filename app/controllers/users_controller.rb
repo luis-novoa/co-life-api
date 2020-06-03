@@ -6,7 +6,10 @@ class UsersController < ApplicationController
   before_action :check_profile_ownership, except: %i[index update]
 
   def show
-    return render json: @user, except: %i[authentication_token], status: :ok if current_user.admin? && current_user.id != @user.id
+    if current_user.admin? && current_user.id != @user.id
+      return render json: @user, except: %i[authentication_token], status: :ok
+    end
+
     render json: @user, status: :ok
   end
 
@@ -15,16 +18,15 @@ class UsersController < ApplicationController
     if current_user.admin?
       render json: @users, except: %i[authentication_token]
     else
-      render json: "Log in as an administrator to perform this action.", status: :unauthorized
+      render json: 'Log in as an administrator to perform this action.', status: :unauthorized
     end
   end
 
   def destroy
-    unless @user.admin
-      @user.delete
-      render json: 'User deleted!', status: :ok
-    end
+    return if @user.admin
 
+    @user.delete
+    render json: 'User deleted!', status: :ok
   end
 
   def update
@@ -32,7 +34,7 @@ class UsersController < ApplicationController
       @user.update(user_params)
       render json: @user, status: :ok
     else
-      render json: "This action can only be performed on your own ID.", status: :unauthorized
+      render json: 'This action can only be performed on your own ID.', status: :unauthorized
     end
   end
 
@@ -51,6 +53,11 @@ class UsersController < ApplicationController
   end
 
   def check_profile_ownership
-    render json: "This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID.", status: :unauthorized unless current_user.id == @user.id || current_user.admin
+    return if current_user.id == @user.id || current_user.admin
+
+    render json:
+        'This action can only be performed on your own ID. '\
+        "Log in as an administrator to perform this action another user's ID.",
+           status: :unauthorized
   end
 end

@@ -127,7 +127,10 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID./)
+        expect(response.body).to eq(
+          'This action can only be performed on your own ID. '\
+          "Log in as an administrator to perform this action another user's ID."
+        )
       end
     end
 
@@ -279,7 +282,10 @@ RSpec.describe 'User request', type: :request do
       end
 
       it 'returns error message' do
-        expect(response.body).to match(/This action can only be performed on your own ID. Log in as an administrator to perform this action another user's ID./)
+        expect(response.body).to eq(
+          'This action can only be performed on your own ID. '\
+          "Log in as an administrator to perform this action another user's ID."
+        )
       end
 
       it "doesn't delete other user's account" do
