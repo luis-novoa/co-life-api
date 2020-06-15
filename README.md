@@ -2,15 +2,29 @@
 
 In this project, I built the API of Co-Life, an app focused on advertising co-living opportunities. You can use this API to can create and manage your account, your ads and your favorite list. I also added administrator privileges to one account. Check the [documentation](https://raw.githack.com/luis-novoa/co-life-doc/gh-pages/index.html) to understand how to interact with it.
 
+[![Documentation Screenshot](./app/assets/readme-imgs/screenshot.png)](https://raw.githack.com/luis-novoa/co-life-doc/gh-pages/index.html "Click to go to the documentation")
+
+## Features
+- Create, update, show and destroy account
+- Create, update, show and destroy ads
+- Add and remove ads from your favorites' list
+- Administrator privileges for account and ads management
+
+## Future Improvements
+- Create the front-end using React
+- Add messaging inside the app
+- Add announcer rating
+
 ## Built With
 
 - Ruby v2.6.5
 - Ruby on Rails v6.0.3.1
+- PostgreSQL
 - Visual Studio Code
 
 ## Live Demo
 
-Send HTTP requests to [https://co-life.herokuapp.com/](https://runnerln.herokuapp.com/) to interact with the API!
+Send HTTP requests to [https://co-life.herokuapp.com/](https://co-life.herokuapp.com/) to interact with the API!
 
 ## Database Structure
 
